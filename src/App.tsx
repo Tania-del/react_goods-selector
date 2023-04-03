@@ -15,71 +15,87 @@ export const goods = [
   'Garlic',
 ];
 
-export const App: React.FC = () => (
-  <main className="section container">
-    <h1 className="title">No goods selected</h1>
+const DEFAULT_SELECTED_NAME = 'Jam';
 
-    <h1 className="title is-flex is-align-items-center">
-      Jam is selected
+type AppState = {
+  selectedName: string | undefined;
+};
 
-      {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-      <button
-        data-cy="ClearButton"
-        type="button"
-        className="delete ml-3"
-      />
-    </h1>
+type AppProps = {};
 
-    <table className="table">
-      <tbody>
-        <tr data-cy="Good">
-          <td>
+export class App extends React.Component<AppProps, AppState> {
+  state = {
+    selectedName: DEFAULT_SELECTED_NAME,
+  };
+
+  updateProducts = (goodName: string) => {
+    this.setState({
+      selectedName: this.isNameMatch(goodName) ? '' : goodName,
+    });
+  };
+
+  deleteSelectedName = () => {
+    this.setState({
+      selectedName: undefined,
+    });
+  };
+
+  isNameMatch = (goodName: string) => {
+    const { selectedName } = this.state;
+
+    return goodName === selectedName;
+  };
+
+  render() {
+    const { selectedName } = this.state;
+    const { isNameMatch, updateProducts, deleteSelectedName } = this;
+
+    return (
+      <main className="section container">
+        <h1 className="title is-flex is-align-items-center">
+          {selectedName ? `${selectedName} is selected` : 'No goods selected'}
+
+          {selectedName && (
+          /* eslint-disable-next-line jsx-a11y/control-has-associated-label */
             <button
-              data-cy="AddButton"
+              onClick={deleteSelectedName}
+              data-cy="ClearButton"
               type="button"
-              className="button"
-            >
-              +
-            </button>
-          </td>
+              className="delete ml-3"
+            />
+          )}
+        </h1>
 
-          <td data-cy="GoodTitle" className="is-vcentered">
-            Dumplings
-          </td>
-        </tr>
+        <table className="table">
+          <tbody>
+            {goods.map((good) => {
+              const isMatched = isNameMatch(good);
 
-        <tr data-cy="Good" className="has-background-success-light">
-          <td>
-            <button
-              data-cy="RemoveButton"
-              type="button"
-              className="button is-info"
-            >
-              -
-            </button>
-          </td>
-
-          <td data-cy="GoodTitle" className="is-vcentered">
-            Jam
-          </td>
-        </tr>
-
-        <tr data-cy="Good">
-          <td>
-            <button
-              data-cy="AddButton"
-              type="button"
-              className="button"
-            >
-              +
-            </button>
-          </td>
-
-          <td data-cy="GoodTitle" className="is-vcentered">
-            Garlic
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </main>
-);
+              return (
+                <tr
+                  key={good}
+                  className={isMatched ? 'has-background-success-light' : ''}
+                  data-cy="Good"
+                >
+                  <td>
+                    <button
+                      data-cy={isMatched ? 'RemoveButton' : 'AddButton'}
+                      onClick={() => updateProducts(good)}
+                      type="button"
+                      className={isMatched ? 'button is-info' : 'button'}
+                    >
+                      {isMatched ? '-' : '+'}
+                    </button>
+                  </td>
+                  <td data-cy="GoodTitle" className="is-vcentered">
+                    {good}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </main>
+    );
+  }
+}
